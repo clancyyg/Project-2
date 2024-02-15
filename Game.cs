@@ -9,6 +9,7 @@ namespace RaceTo21
     /// </summary>
     public class Game
     {
+        int winningPoint;
         int bustCount = 0;// Counting how many player are busted in one game
         int numberOfPlayers; // number of players in current game
         List<Player> players = new List<Player>(); // list of objects containing player data
@@ -30,6 +31,8 @@ namespace RaceTo21
             nextTask = Task.GetNumberOfPlayers;
         }
 
+
+
         /// <summary>
         /// Adds a player to the current game.
         /// Called by DoNextTask() method.
@@ -43,7 +46,6 @@ namespace RaceTo21
 
         public void DoNextTask()
         {
-
             //This meaning there are still more than 1 player's status isn't bust, game continue
             if (bustCount != players.Count - 1)
             {
@@ -61,11 +63,47 @@ namespace RaceTo21
                         AddPlayer(name); // NOTE: player list will start from 0 index even though we use 1 for our count here to make the player numbering more human-friendly
                     }
                     Console.WriteLine("================================"); 
-                    nextTask = Task.IntroducePlayers;
+                    nextTask = Task.SetWinningPoint;
+                }
+                else if (nextTask == Task.SetWinningPoint)
+                {
+                    while (true)
+                    {
+                        Console.Write("Please set the winning point(Only numbers and no negative or 0) : ");
+                        string temp = Console.ReadLine();
+                        if(!int.TryParse(temp, out winningPoint))
+                        {
+                            Console.WriteLine("Please enter Only numbers and no negative");
+                        }
+                        else
+                        {
+                            
+                            if(winningPoint <= 0)
+                            {
+                                Console.WriteLine("No negative or 0!");
+                            }
+                            else
+                            {
+                                if (IsAgreed())
+                                {
+                                    Console.WriteLine("half or more than half playes agree with this number, let's play!");
+                                    nextTask = Task.IntroducePlayers;
+                                    break;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Less than half playes agree with this number, try another one");
+                                }
+                            }
+                        }
+                        Console.WriteLine("================================");
+                    }
+
                 }
                 else if (nextTask == Task.IntroducePlayers)
                 {
                     cardTable.ShowPlayers(players);
+                    Console.WriteLine("The winning point is " + winningPoint);
                     cardTable.ShowEarnedPoints(players);
                     nextTask = Task.PlayerTurn;
                     Console.WriteLine("================================"); 
@@ -97,11 +135,30 @@ namespace RaceTo21
                                 //If there is a player first reached 21, the game end, and return the function
                                 player.status = PlayerStatus.win;
                                 //Winner will earn points that equals to their current hand
-                                player.earnedPoints = player.score;
+                                player.earnedPoints += player.score;
                                 cardTable.ShowHand(player);
                                 cardTable.AnnounceWinner(player,players);
-                                nextTask = Task.GameOver;
-                                return;
+                                MinusBustedPlayersPoint();
+                                foreach (Player player1 in players)
+                                {
+                                    if(player1.status == PlayerStatus.bust)
+                                    {
+                                        if (player1.earnedPoints - player1.score < 0) player1.earnedPoints = 0;
+                                        else player1.earnedPoints -= player1.score;
+                                    }
+                                }
+                                if(player.earnedPoints >= winningPoint)
+                                {
+                                    Console.WriteLine(player.name + " has reached the winning point and win the whole game !");
+                                    nextTask = Task.GameOver;
+                                    return;
+                                }
+                                else
+                                {
+                                    RestartGame();
+                                    return;
+                                }
+
                             }
                             Console.WriteLine("================================");
                         }
@@ -122,10 +179,22 @@ namespace RaceTo21
                     {
                         Player winner = DoFinalScoring();
                         //Winner will earn points that equals to their current hand
-                        winner.earnedPoints = winner.score;
+                        winner.earnedPoints += winner.score;
                         cardTable.AnnounceWinner(winner,players);
+                        MinusBustedPlayersPoint();
+                        if (winner.earnedPoints >= winningPoint)
+                        {
+                            Console.WriteLine(winner.name + " has reached the winning point and win the whole game !");
+                            nextTask = Task.GameOver;
+                            return;
+                        }
+                        else
+                        {
+                            RestartGame();
+                            return;
+                        }
                         
-                        nextTask = Task.GameOver;
+                        //nextTask = Task.GameOver;
                     }
                     else
                     {
@@ -153,10 +222,21 @@ namespace RaceTo21
                 }
                 Player winner = players[index];
                 //Winner will earn points that equals to their current hand
-                winner.earnedPoints = winner.score;
+                winner.earnedPoints += winner.score;
                 cardTable.AnnounceWinner(winner,players);
-                nextTask = Task.GameOver;
-                return;
+                MinusBustedPlayersPoint();
+                if (winner.earnedPoints >= winningPoint)
+                {
+                    Console.WriteLine(winner.name + " has reached the winning point and win the whole game !");
+                    nextTask = Task.GameOver;
+                    return;
+                }
+                else
+                {
+                    RestartGame();
+                    return;
+                }
+
             }
 
 
@@ -201,31 +281,69 @@ namespace RaceTo21
                             break;
                     }
                 }
-                /* Alternative method of handling the above foreach loop using char math instead of strings.
-                 * No need to do this; just showing you a trick!
-                 */
-                //foreach (Card card in player.cards)
-                //{
-                //    char faceValue = card.ID[0];
-                //    switch (faceValue)
-                //    {
-                //        case 'K':
-                //        case 'Q':
-                //        case 'J':
-                //            score = score + 10;
-                //            break;
-                //        case 'A':
-                //            score = score + 1;
-                //            break;
-                //        default:
-                //            score = score + (faceValue - '0'); // clever char math!
-                //            break;
-                //    }
-                //}
+                
             }
             return score;
         }
 
+        public void MinusBustedPlayersPoint()
+        {
+            foreach (Player player in players)
+            {
+                if (player.status == PlayerStatus.bust)
+                {
+                    if (player.earnedPoints - 21 < 0) player.earnedPoints = 0;
+                    else player.earnedPoints -= 21;
+                }
+            }
+        }
+
+        public bool IsAgreed()
+        {
+            int totalPlayer = players.Count;
+            int agreedPlayer = 0;
+            while (true)
+            {
+                foreach(Player player in players)
+                {
+                    Console.Write(player.name + ", do you agree with this winning point? (Y/N)");
+                    string response = Console.ReadLine();
+                    if (response.ToUpper().StartsWith("Y"))
+                    {
+                        agreedPlayer++;
+
+                    }
+                    else if (response.ToUpper().StartsWith("N"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Please answer Y(es) or N(o)!");
+                    }
+                }
+
+                if (agreedPlayer > totalPlayer % 2) return true;
+                else return false;
+                
+            }
+        }
+
+        public void RestartGame()
+        {
+            foreach (Player player in players)
+            {
+                player.cards.Clear();
+                player.status = PlayerStatus.active;
+                player.score = 0;
+            }
+            Deck deck = new Deck();
+            deck.Shuffle();
+            deck.ShowAllCards();
+            currentPlayer = 0;
+            bustCount = 0;
+            nextTask = Task.IntroducePlayers;
+        }
 
         public bool CheckActivePlayers()
         {
