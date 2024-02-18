@@ -15,11 +15,13 @@ namespace RaceTo21
         private string ID;
         private string name; // Option 1: just store the name for each card alongside the ID
 
+        //Setter method for ID
         public void SetID(string cardName , string cardSuit)
         {
             ID = cardName + cardSuit;
         }
 
+        //Getter method for ID
         public string GetID()
         {
             return ID;

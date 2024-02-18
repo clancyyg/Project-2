@@ -65,9 +65,9 @@ namespace RaceTo21
                             cardLongName += "Diamonds";
                             break;
                     }
+                    //card a card set its ID and then put it into the cards array
                     Card card = new Card();
                     card.SetID(cardName, cardSuit);
-
                     cards.Add(card);
                 }
             }
@@ -102,11 +102,6 @@ namespace RaceTo21
         /// <summary>
         /// Shows all cards. Kinda hacky. See comment below.
         /// </summary>
-        /* Maybe we can make a variation on this that's more useful,
-         * but at the moment it's just really to confirm that our 
-         * shuffling method(s) worked! And normally we want our card 
-         * table to do all of the displaying, don't we?!
-         */
         public void ShowAllCards()
         {
             for (int i=0; i<cards.Count; i++)
@@ -129,7 +124,6 @@ namespace RaceTo21
         {
             Card card = cards[cards.Count - 1];
             cards.RemoveAt(cards.Count - 1);
-            // Console.WriteLine("I'm giving you " + card);
             return card;
         }
     }

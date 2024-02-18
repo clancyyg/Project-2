@@ -14,6 +14,7 @@ namespace RaceTo21
     {
         GetNumberOfPlayers,
         GetNames,
+        //I added this in task, setgoal, in this stage, player can set a goal to win the game
         SetGoal,
         IntroducePlayers,
         PlayerTurn,
