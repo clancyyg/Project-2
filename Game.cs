@@ -17,6 +17,8 @@ namespace RaceTo21
         int currentPlayer = 0; // current player on list
         public Task nextTask; // keeps track of game state
         private bool cheating = false; // lets you cheat for testing purposes if true
+        int winngPoint = 0;
+        
 
         /// <summary>
         /// Game Manager constructor.
@@ -61,18 +63,43 @@ namespace RaceTo21
                         AddPlayer(name); // NOTE: player list will start from 0 index even though we use 1 for our count here to make the player numbering more human-friendly
                     }
                     Console.WriteLine("================================"); 
-                    nextTask = Task.IntroducePlayers;
+                    nextTask = Task.SetGoal;
+                }
+                else if (nextTask == Task.SetGoal)
+                {
+                    while (true)
+                    {
+                        Console.Write("Please set the goal for this game(Only numbers and no negative or 0: ");
+                        string temp = Console.ReadLine();
+                        if(int.TryParse(temp, out winngPoint) && winngPoint >= 0)
+                        {
+                            if (IsAgreed())
+                            {
+                                Console.WriteLine("Half or more that half players agreed with this goal, let's play ! ");
+                                Console.WriteLine("================================");
+                                nextTask = Task.IntroducePlayers;
+                                break;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Most of plyers disagreed with this goal, try another one");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Please Only numbers and no negative or 0! ");
+                        }
+                    }
                 }
                 else if (nextTask == Task.IntroducePlayers)
                 {
                     cardTable.ShowPlayers(players);
-                    cardTable.ShowEarnedPoints(players);
+                    
                     nextTask = Task.PlayerTurn;
                     Console.WriteLine("================================"); 
                 }
                 else if (nextTask == Task.PlayerTurn)
                 {
-                    
                     Player player = players[currentPlayer];
                     if (player.status == PlayerStatus.active)
                     {
@@ -82,26 +109,39 @@ namespace RaceTo21
                             for(int i = 0; i < temp; i++)
                             {
                                 Card card = deck.DealTopCard();
-                                player.cards.Add(card);
-                                player.score = ScoreHand(player);
+                                player.AddCard(card);
+                                player.SetScore(ScoreHand(player));
                             }
 
-                            if (player.score > 21)
+                            if (player.GetScore() > 21)
                             {
                                 player.status = PlayerStatus.bust;
                                 //counting how many players are busted
                                 bustCount++;
                             }
-                            else if (player.score == 21)
+                            else if (player.GetScore() == 21)
                             {
                                 //If there is a player first reached 21, the game end, and return the function
                                 player.status = PlayerStatus.win;
                                 //Winner will earn points that equals to their current hand
-                                player.earnedPoints = player.score;
                                 cardTable.ShowHand(player);
                                 cardTable.AnnounceWinner(player,players);
-                                nextTask = Task.GameOver;
-                                return;
+                                player.SetEarnedPoints(player.GetScore());
+                                if(player.GetEarnedPoints() >= winngPoint)
+                                {
+                                    Console.WriteLine(player.GetName() + " reached the goal " + player.GetName() + " wins!");
+                                    nextTask = Task.GameOver;
+                                    return;
+                                }
+                                else
+                                {
+                                    PunishForBust();
+                                    cardTable.ShowEarnedPoints(players);
+                                    Restart();
+                                    nextTask = Task.PlayerTurn;
+                                    return;
+                                }
+
                             }
                             Console.WriteLine("================================");
                         }
@@ -122,10 +162,22 @@ namespace RaceTo21
                     {
                         Player winner = DoFinalScoring();
                         //Winner will earn points that equals to their current hand
-                        winner.earnedPoints = winner.score;
+                        winner.SetEarnedPoints(winner.GetScore());
                         cardTable.AnnounceWinner(winner,players);
-                        
-                        nextTask = Task.GameOver;
+                        if (winner.GetEarnedPoints() >= winngPoint)
+                        {
+                            Console.WriteLine(winner.GetName() + " reached the goal " + winner.GetName() + " wins!");
+                            nextTask = Task.GameOver;
+                            return;
+                        }
+                        else
+                        {
+                            PunishForBust();
+                            cardTable.ShowEarnedPoints(players);
+                            Restart();
+                            nextTask = Task.PlayerTurn;
+                            return;
+                        }
                     }
                     else
                     {
@@ -153,10 +205,22 @@ namespace RaceTo21
                 }
                 Player winner = players[index];
                 //Winner will earn points that equals to their current hand
-                winner.earnedPoints = winner.score;
+                winner.SetEarnedPoints(winner.GetScore());
                 cardTable.AnnounceWinner(winner,players);
-                nextTask = Task.GameOver;
-                return;
+                if (winner.GetEarnedPoints() >= winngPoint)
+                {
+                    Console.WriteLine(winner.GetName() + " reached the goal " + winner.GetName() + " wins!");
+                    nextTask = Task.GameOver;
+                    return;
+                }
+                else
+                {
+                    PunishForBust();
+                    cardTable.ShowEarnedPoints(players);
+                    Restart();
+                    nextTask = Task.PlayerTurn;
+                    return;
+                }
             }
 
 
@@ -176,16 +240,16 @@ namespace RaceTo21
                 string response = null;
                 while (int.TryParse(response, out score) == false)
                 {
-                    Console.Write("OK, what should player " + player.name + "'s score be?");
+                    Console.Write("OK, what should player " + player.GetName() + "'s score be?");
                     response = Console.ReadLine();
                 }
                 return score;
             }
             else
             {
-                foreach (Card card in player.cards)
+                foreach (Card card in player.GetCard())
                 {
-                    string faceValue = card.ID.Remove(card.ID.Length - 1);
+                    string faceValue = card.GetID().Remove(card.GetID().Length - 1);
                     switch (faceValue)
                     {
                         case "K":
@@ -201,31 +265,25 @@ namespace RaceTo21
                             break;
                     }
                 }
-                /* Alternative method of handling the above foreach loop using char math instead of strings.
-                 * No need to do this; just showing you a trick!
-                 */
-                //foreach (Card card in player.cards)
-                //{
-                //    char faceValue = card.ID[0];
-                //    switch (faceValue)
-                //    {
-                //        case 'K':
-                //        case 'Q':
-                //        case 'J':
-                //            score = score + 10;
-                //            break;
-                //        case 'A':
-                //            score = score + 1;
-                //            break;
-                //        default:
-                //            score = score + (faceValue - '0'); // clever char math!
-                //            break;
-                //    }
-                //}
+               
             }
             return score;
         }
 
+        // This function is to find busted player and their earnedPoint will minus 21
+        public void PunishForBust()
+        {
+
+            foreach (var player in players)
+            {
+                if(player.status == PlayerStatus.bust)
+                {
+                    Console.WriteLine(player.GetName() + " will lose 21 points");
+                    int temp = -21;
+                    player.SetEarnedPoints(temp);
+                }
+            }
+        }
 
         public bool CheckActivePlayers()
         {
@@ -240,6 +298,47 @@ namespace RaceTo21
             return false; // everyone has stayed or busted, or someone won!
         }
 
+        public bool IsAgreed()
+        {
+            int agreedCount = 0;
+            foreach(Player player in players)
+            {
+                Console.Write(player.GetName() + " do you agree with this goal?(Y/N) :");
+                string response = Console.ReadLine();
+                if (response.ToUpper().StartsWith("Y"))
+                {
+                    agreedCount++;
+                }
+                else if (response.ToUpper().StartsWith("N"))
+                {
+                    continue;
+                }
+                else
+                {
+                    Console.WriteLine("Please answer Y(es) or N(o)!");
+                }
+            }
+
+            if (agreedCount >= (players.Count+1) / 2) return true;
+            else return false;
+        }
+
+
+
+        public void Restart()
+        {
+            foreach(Player player in players)
+            {
+                player.SetScore(0);
+                player.ClearHand();
+                player.status = PlayerStatus.active;
+            }
+            currentPlayer = 0;
+            bustCount = 0;
+            Deck deck = new Deck();
+            deck.Shuffle();
+            deck.ShowAllCards();
+        }
 
         public Player DoFinalScoring()
         {
@@ -253,9 +352,9 @@ namespace RaceTo21
                 }
                 if (player.status == PlayerStatus.stay) // still could win...
                 {
-                    if (player.score > highScore)
+                    if (player.GetScore() > highScore)
                     {
-                        highScore = player.score;
+                        highScore = player.GetScore();
                     }
                 }
                 // if busted don't bother checking!
@@ -267,7 +366,7 @@ namespace RaceTo21
             if (highScore > 0) 
             {
                 // find the FIRST player in list who meets win condition
-                return players.Find(player => player.score == highScore);
+                return players.Find(player => player.GetScore() == highScore);
             }
             else
             {

@@ -65,7 +65,10 @@ namespace RaceTo21
                             cardLongName += "Diamonds";
                             break;
                     }
-                    cards.Add(new Card {ID = cardName + cardSuit, name = cardLongName});
+                    Card card = new Card();
+                    card.SetID(cardName, cardSuit);
+
+                    cards.Add(card);
                 }
             }
         }
@@ -108,7 +111,7 @@ namespace RaceTo21
         {
             for (int i=0; i<cards.Count; i++)
             {
-                Console.Write(i+":"+cards[i].ID); // NOTE: a list property can be accessed by an index just like an Array!
+                Console.Write(i+":"+cards[i].GetID()); // NOTE: a list property can be accessed by an index just like an Array!
                 if (i < cards.Count -1)
                 {
                     Console.Write(" ");

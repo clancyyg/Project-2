@@ -64,13 +64,13 @@ namespace RaceTo21
         {
             while (true)
             {
-                Console.Write(player.name + ", do you want a card? (Y/N)");
+                Console.Write(player.GetName() + ", do you want a card? (Y/N)");
                 string response = Console.ReadLine();
                 if (response.ToUpper().StartsWith("Y"))
                 {
                     while (response.ToUpper().StartsWith("Y"))
                     {
-                        Console.Write(player.name + ", how many cards do you want(Up to 3)?");
+                        Console.Write(player.GetName() + ", how many cards do you want(Up to 3)?");
                         string cardNumber = Console.ReadLine();
                         if(int.TryParse(cardNumber, out int number))
                         {
@@ -100,24 +100,24 @@ namespace RaceTo21
 
         public void ShowHand(Player player)
         {
-            if (player.cards.Count > 0)
+            if (player.GetCard().Count > 0)
             {
-                Console.Write(player.name + " has: ");
-                foreach (Card card in player.cards)
+                Console.Write(player.GetName() + " has: ");
+                foreach (Card card in player.GetCard())
                 {
                     /*Using list.IndexOf(T) method to get current card's index, if it isn't the last card, then add ","
                       else only out put itself */
-                    if(player.cards.IndexOf(card) != player.cards.Count - 1)
+                    if(player.GetCard().IndexOf(card) != player.GetCard().Count - 1)
                     {
-                        Console.Write(card.name + ", ");
+                        Console.Write(card.GetName() + ", ");
                     }
                     else
                     {
-                        Console.Write(card.name);
+                        Console.Write(card.GetName());
                     }
                     
                 }
-                Console.Write("=" + player.score + "/21 ");
+                Console.Write("=" + player.GetScore() + "/21 ");
                 if (player.status != PlayerStatus.active)
                 {
                     Console.Write("(" + player.status.ToString().ToUpper() + ")");
@@ -138,7 +138,7 @@ namespace RaceTo21
         {
             foreach(Player player in players)
             {
-                Console.WriteLine(player.name + " has " + player.earnedPoints + " Points");
+                Console.WriteLine(player.GetName() + " has " + player.GetEarnedPoints() + " Points");
             }
         }
 
@@ -147,18 +147,18 @@ namespace RaceTo21
         {
             if (player != null)
             {
-                Console.WriteLine(player.name + " wins!");
+                Console.WriteLine(player.GetName() + " wins!");
                 //After announced the winner, printing current earned points of each player
-                foreach (Player player1 in players)
+/*                foreach (Player player1 in players)
                 {
-                    Console.WriteLine(player1.name + " has " + player1.earnedPoints + " Points");
-                }
+                    Console.WriteLine(player.GetName() + " has " + player1.GetEarnedPoints() + " Points");
+                }*/
             }
             else
             {
                 Console.WriteLine("Everyone busted!");
             }
-            Console.Write("Press <Enter> to exit... ");
+            Console.Write("Press <Enter> to next round... ");
             while (Console.ReadKey().Key != ConsoleKey.Enter) { }
         }
     }

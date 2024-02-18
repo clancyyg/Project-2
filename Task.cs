@@ -14,6 +14,7 @@ namespace RaceTo21
     {
         GetNumberOfPlayers,
         GetNames,
+        SetGoal,
         IntroducePlayers,
         PlayerTurn,
         CheckForEnd,

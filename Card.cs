@@ -12,16 +12,20 @@ namespace RaceTo21
     /// </summary>
     public class Card
     {
-        public string ID;
-        public string name; // Option 1: just store the name for each card alongside the ID
+        private string ID;
+        private string name; // Option 1: just store the name for each card alongside the ID
 
-        // Option 2: figure out what the name should be based on the ID
-        // (only uncomment this code if you choose to use this INSTEAD OF the name property, for now)
-        /// <summary>
-        /// Example of other approach to card name. If using this approach, you would
-        /// replace any reference to card.name with card.GetName(). Later in the course,
-        /// you will learn how to create a "getter" that combines these two approaches.
-        /// Note that a lot of the code in this method is just slightly modified from Deck.cs
+        public void SetID(string cardName , string cardSuit)
+        {
+            ID = cardName + cardSuit;
+        }
+
+        public string GetID()
+        {
+            return ID;
+        }
+
+
         /// </summary>
         // <returns>String containing full name of card, calculated from the ID</returns>
         public string GetName()
@@ -47,7 +51,7 @@ namespace RaceTo21
                             break;
                     }
 
-            string cardSuit = ID.Remove(ID.Length);
+            string cardSuit = ID.Remove(0,1);
             switch (cardSuit)
                     {
                         case "S":
