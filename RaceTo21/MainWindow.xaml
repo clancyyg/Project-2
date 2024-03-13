@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
 
+    <!--Get resource from IDToImageSourceConverter-->
     <Window.Resources>
         <local:IDToImageSourceConverter x:Key="IDToImageSourceConverter"/>
     </Window.Resources>
@@ -29,16 +30,20 @@
 
         </StackPanel>
 
+        <!--This will show the cards in player's hand-->
         <ListView x:Name="CardsListView" Margin="464,45,158,0" BorderThickness="0,0,0,0" >
             <ListView.Background>
                 <SolidColorBrush Color="White" Opacity="0"/>
             </ListView.Background>
             <ListView.ItemTemplate>
+                <!--Gettting Image resource by Data binding-->
                 <DataTemplate>
                     <Image Source="{Binding ID, Converter={StaticResource IDToImageSourceConverter}}" Width="100" Height="80" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        
+        <!--Some UI elements to show information-->
         <TextBlock x:Name="PlayerName" HorizontalAlignment="Left" Margin="464,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="178" FontWeight="Bold" TextAlignment="Center" FontSize="16" Foreground="#FFFFFCFC"/>
         <TextBlock x:Name="Target" HorizontalAlignment="Left" Margin="0,27,0,0" TextWrapping="Wrap" Text="The Winning Point is 100" VerticalAlignment="Top" Width="240" FontSize="18" FontWeight="Bold" Foreground="#FFFEFBFB" Visibility="Hidden"/>
         <TextBlock x:Name="Title" HorizontalAlignment="Center" Margin="0,68,0,0" TextWrapping="Wrap" Text="RaceTo21" VerticalAlignment="Top" Height="35" Width="128" TextAlignment="Center" FontSize="24" FontWeight="Bold"/>

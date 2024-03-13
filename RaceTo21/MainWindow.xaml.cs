@@ -43,11 +43,13 @@ namespace RaceTo21
             deck.Shuffle();//shuffle the card deck
         }
 
+        //This function will create textboxes to get input for Player's name
         private void GenerateTextBoxes_Click(object sender, RoutedEventArgs e)
         {
             textBoxContainer.Children.Clear();
             textBoxes.Clear();
 
+            //If player number is vaild, then create boxes to get input
             if (int.TryParse(inputTextBox.Text, out numberOfPlayers) && numberOfPlayers >= 2 && numberOfPlayers < 10)
             {
                 for (int i = 0; i < numberOfPlayers; i++)
@@ -80,6 +82,7 @@ namespace RaceTo21
                 AddPlayer(textBoxes[i].Text);
             }
 
+            //Priting players information
             foreach (Player player in players)
             {
                 namesListBox.Items.Add("Player " + (players.IndexOf(player) + 1) + ": " + player.GetName().ToString() + " Score: " + player.GetScore().ToString() + " Status:" + player.status.ToString() + " Earned points:" + player.GetEarnedPoints());
@@ -95,7 +98,7 @@ namespace RaceTo21
             AskPlayerForCards();//Get into the next task, player's turn
         }
 
-
+        //Asking players whether they cards and then do the further process 
         private void AskPlayerForCards()
         {
             while (true)
@@ -107,7 +110,7 @@ namespace RaceTo21
                     {
                         if (players[currentPlayer].status == PlayerStatus.active)
                         {
-                            //Aksing player whether this player needs darw cards
+                            //Aksing player whether this player needs darw cards 
                             MessageBoxResult result = MessageBox.Show("Player " + players[currentPlayer].GetName().ToString() + ", do you want to draw cards?", "Draw Cards", MessageBoxButton.YesNo);
                             if (result == MessageBoxResult.Yes)
                             {
@@ -172,6 +175,7 @@ namespace RaceTo21
                                     }
                                     else
                                     {
+                                        //Restart a turn and punish those players who busted, minus 21 points
                                         PunishForBust();
                                         Restart();
                                         for (int i = 0; i < players.Count; i++)
@@ -211,14 +215,14 @@ namespace RaceTo21
                     int index = 0;
                     foreach (Player player in players)
                     {
+                        //Finding the player whose status is active or stay
                         if (player.status != PlayerStatus.bust) index = players.IndexOf(player);
                     }
                     players[index].status = PlayerStatus.win;
                     cardTable.AnnounceWinner(players[index], players);
                     players[index].SetEarnedPoints(players[index].GetScore());
-                    PunishForBust();
-                    Restart();
-                    for (int i = 0; i < players.Count; i++)
+                    PunishForBust();// players who busted will lose 21 points
+                    for (int i = 0; i < players.Count; i++)//Updating UI
                     {
                         namesListBox.Items[i] = "Player " + (players.IndexOf(players[i]) + 1) + ": " + players[i].GetName().ToString() + "   Score: " + players[i].GetScore().ToString() + " Status:" + players[i].status.ToString() + " Earned points:" + players[i].GetEarnedPoints();
                     }
@@ -245,6 +249,7 @@ namespace RaceTo21
 
         }
 
+        //This function is to get input about how many card the player needs and then do the further process based on the result
         private int AskNumCardsToDraw()
         {
             int number = 0;
