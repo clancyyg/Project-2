@@ -146,13 +146,13 @@ namespace RaceTo21
                                     {
                                         //Restart a turn and punish those players who busted, minus 21 points
                                         PunishForBust();
-                                        Restart();
+                                        Restart();//Reshuffle the deck
                                         //Update information
                                         for (int i = 0; i < players.Count; i++)
                                         {
                                             namesListBox.Items[i] = "Player " + (players.IndexOf(players[i]) + 1) + ": " + players[i].GetName().ToString() + "   Score: " + players[i].GetScore().ToString() + " Status:" + players[i].status.ToString() + " Earned points:" + players[i].GetEarnedPoints();
                                         }
-                                        AskPlayerForCards();
+                                        AskPlayerForCards();//start a new turn
                                         break;
                                     }
                                 }
@@ -182,11 +182,12 @@ namespace RaceTo21
                                         {
                                             namesListBox.Items[i] = "Player " + (players.IndexOf(players[i]) + 1) + ": " + players[i].GetName().ToString() + "   Score: " + players[i].GetScore().ToString() + " Status:" + players[i].status.ToString() + " Earned points:" + players[i].GetEarnedPoints();
                                         }
-                                        AskPlayerForCards();
+                                        AskPlayerForCards();//start a new turn
                                         break;
                                     }
                                 }
                             }
+                            //Updating current player' infromation
                             namesListBox.Items[currentPlayer] = "Player " + (players.IndexOf(players[currentPlayer]) + 1) + ": " + players[currentPlayer].GetName().ToString() + "   Score: " + players[currentPlayer].GetScore().ToString() + " Status:" + players[currentPlayer].status.ToString() + " Earned points:" + players[currentPlayer].GetEarnedPoints();
                             currentPlayer++;
                         }
@@ -235,6 +236,7 @@ namespace RaceTo21
                     }
                     else
                     {
+                        //If not, reshuffle the deck start a new turn
                         Restart();
                         for (int i = 0; i < players.Count; i++)
                         {
